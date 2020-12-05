@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title></title>
+        <!-- 1. Add JQuery and Highcharts in the head of your page -->
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/indicators.js"></script>
+        <script src="https://code.highcharts.com/stock/indicators/volume-by-price.js"></script>
+         
+        <!-- 3. Add the JavaScript with the Highchart options to initialize the chart -->
+    <script type="text/javascript">
+      
+        function formatDate(date) {
+            var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+        
+        function getChart(ticker){
+            var xhttp_ch = new XMLHttpRequest();
+            
+            var d = new Date();
+            d.setMonth(d.getMonth() - 6);
+            var date = formatDate(d)
+            
+            xhttp_ch.open('GET', 'https://nodejsserver-294803.wn.r.appspot.com/api/chart/' + ticker + '/' + date, true)
+            xhttp_ch.onload = function() {
+                var data = JSON.parse(this.responseText);
+                if (xhttp_ch.status >= 200 && xhttp_ch.status < 4000) {
+                    // split the data set into ohlc and volume
+                    var ohlc = [],
+                    volume = [],
+                    dataLength = data.length,
+                    // set the allowed units for data grouping
+                    groupingUnits = [[
+                        'week',                         // unit name
+                        [1]                             // allowed multiples
+                    ], [
+                        'month',
+                        [1, 2, 3, 4, 6]
+                    ]],
+
+                    i = 0;
+
+                for (i; i < dataLength; i += 1) {
+                    ohlc.push([
+                        Date.parse(data[i].date), // the date
+                        data[i].open, // open
+                        data[i].high, // high
+                        data[i].low, // low
+                        data[i].close // close
+                    ]);
+
+                    volume.push([
+                        Date.parse(data[i].date), // the date
+                        data[i].volume // the volume
+                    ]);
+                }
+
+                // create the chart
+                Highcharts.stockChart('container', {
+
+                    rangeSelector: {
+                        selected: 2
+                    },
+
+                    title: {
+                        text: ''
+                    },
+
+                    subtitle: {
+                        text: ''
+                    },
+
+                    yAxis: [{
+                        startOnTick: false,
+                        endOnTick: false,
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'OHLC'
+                        },
+                        height: '60%',
+                        lineWidth: 2,
+                        resize: {
+                            enabled: true
+                        }
+                    }, {
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'Volume'
+                        },
+                        top: '65%',
+                        height: '35%',
+                        offset: 0,
+                        lineWidth: 2
+                    }],
+
+                    tooltip: {
+                        split: true
+                    },
+
+                    plotOptions: {
+                        series: {
+                            dataGrouping: {
+                                units: groupingUnits
+                            }
+                        }
+                    },
+
+                    series: [{
+                        type: 'candlestick',
+                        name: ticker.toUpperCase(),
+                        id: ticker.toUpperCase(),
+                        zIndex: 2,
+                        data: ohlc
+                    }, {
+                        type: 'column',
+                        name: 'Volume',
+                        id: 'volume',
+                        data: volume,
+                        yAxis: 1
+                    }, {
+                        type: 'vbp',
+                        linkedTo: ticker.toUpperCase(),
+                        params: {
+                            volumeSeriesID: 'volume'
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        zoneLines: {
+                            enabled: false
+                        }
+                    }, {
+                        type: 'sma',
+                        linkedTo: ticker.toUpperCase(),
+                        zIndex: 1,
+                        marker: {
+                            enabled: false
+                        }
+                    }]
+                });
+        }
+    }
+    xhttp_ch.send();
+   
+}
+
+        </script>
+         
+    </head>
+    <body>
+         <header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'></header>
+        <!-- 3. Add the container -->
+        <div id="container" style="width: 380px; height: 400px; margin: 0 auto"></div>      
+                 
+    </body>
+</html>
