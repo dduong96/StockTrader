@@ -58,6 +58,9 @@ struct ContentView: View {
                                 VStack (alignment: .leading){
                                     Text("Net Worth")
                                         .font(.title)
+                                        .onAppear {
+                                            self.currentValue = 0.00
+                                        }
                                     let uninvested = userDefaults.double(forKey: "budget")
                                     Text("\(uninvested + self.currentValue, specifier: "%.2f")")
                                             .bold()
