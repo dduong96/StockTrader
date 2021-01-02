@@ -330,7 +330,7 @@ extension DetailView {
                         Label("Open in Safari", systemImage: "safari")
                     }
                     Button(action: {
-                        if let url = URL(string: "https://twitter.com/intent/tweet?text=Check%20out%20this%20link:%20\(stockVM.news[0].url)&hashtags=CSCI571StockApp") {
+                        if let url = URL(string: "https://twitter.com/intent/tweet?text=Check%20out%20this%20link:%20\(stockVM.news[0].url)&hashtags=StockTrader") {
                                UIApplication.shared.open(url)
                            }
                     }) {
